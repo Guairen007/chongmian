@@ -64,7 +64,7 @@ resetBtn.addEventListener('click', () => {
     analysisResult.style.display = 'none';
 });
 
-// 开始分析（真实 API 调用）
+// 开始分析（调用 Hugging Face 免费 API）
 analyzeBtn.addEventListener('click', async () => {
     if (!selectedFile) return;
     
@@ -79,14 +79,14 @@ analyzeBtn.addEventListener('click', async () => {
     const personalityResult = document.getElementById('personalityResult');
     
     // 显示加载状态
-    breedResult.textContent = '📊 识别品种中...';
+    breedResult.textContent = '📊 调用 AI 识别中...';
     colorResult.textContent = '🎨 分析毛色中...';
     faceResult.textContent = '😺 解读面相中...';
     personalityResult.textContent = '💭 分析性格中...';
     
     // 禁用按钮
     analyzeBtn.disabled = true;
-    analyzeBtn.textContent = '⏳ 分析中...';
+    analyzeBtn.textContent = '⏳ AI 识别中...';
     
     try {
         // 将图片转为 base64
@@ -96,8 +96,8 @@ analyzeBtn.addEventListener('click', async () => {
             reader.readAsDataURL(selectedFile);
         });
         
-        // 调用后端 API
-        const response = await fetch('/api/analyze', {
+        // 调用后端 API（Hugging Face）
+        const response = await fetch('/api/pet-identify', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -121,11 +121,31 @@ analyzeBtn.addEventListener('click', async () => {
             personalityResult.textContent = result.data.personality;
             
             // 添加置信度显示
-            const confidence = Math.round(result.data.confidence * 100);
-            breedResult.textContent += ` (置信度: ${confidence}%)`;
+            if (result.data.confidence) {
+                const confidence = Math.round(result.data.confidence * 100);
+                breedResult.textContent += ` (置信度: ${confidence}%)`;
+            }
+            
+            // 如果有提示（比如使用了模拟数据）
+            if (result.note) {
+                console.log('提示:', result.note);
+            }
         } else {
             throw new Error(result.error || '分析失败');
         }
+        
+        // 添加动画效果
+        const resultCards = document.querySelectorAll('.result-card');
+        resultCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.transform = 'scale(1.05)';
+                card.style.background = '#FFF5F0';
+                setTimeout(() => {
+                    card.style.transform = 'scale(1)';
+                    card.style.background = '';
+                }, 300);
+            }, index * 100);
+        });
         
     } catch (error) {
         console.error('分析失败:', error);
@@ -134,8 +154,7 @@ analyzeBtn.addEventListener('click', async () => {
         faceResult.textContent = '';
         personalityResult.textContent = '';
         
-        // 显示错误信息
-        alert('分析失败，请重试。如果持续失败，可能是 API 服务暂时不可用。');
+        alert('AI 识别失败，请重试。如果持续失败，可能是 Hugging Face API 暂时不可用。');
     } finally {
         // 恢复按钮
         analyzeBtn.disabled = false;
