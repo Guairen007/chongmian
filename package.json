@@ -1,0 +1,13 @@
+{
+  "name": "chongmian",
+  "version": "1.0.0",
+  "description": "宠面 - 宠物AI识别工具",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "keywords": ["宠物", "AI", "识别"],
+  "author": "",
+  "license": "MIT"
+}
